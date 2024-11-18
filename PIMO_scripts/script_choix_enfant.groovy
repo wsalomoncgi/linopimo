@@ -2,7 +2,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 // Get the workspace directory from the environment
-def workspace = build.getEnvironment(listener).get('WORKSPACE')
+def workspace = System.getenv('WORKSPACE')
 
 // Check if workspace is null
 if (workspace == null) {
@@ -10,9 +10,9 @@ if (workspace == null) {
 }
 
 // Read parameters from Jenkins
-def parent = build.getEnvironment(listener).get('PARENT')
-def enfant = build.getEnvironment(listener).get('ENFANT')
-def age = build.getEnvironment(listener).get('AGE')
+def parent = System.getenv('PARENT')
+def enfant = System.getenv('ENFANT')
+def age = System.getenv('AGE')
 
 def dateMin
 def dateMax
