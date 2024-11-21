@@ -9,13 +9,12 @@ if (workspace == null) {
 // Read parameters from Jenkins
 def nom = System.getenv('NOM')
 def prenom = System.getenv('PRENOM')
-def gender = System.getenv('GENDER')
+def gender = System.getenv('GENRE')
 def birth_date = System.getenv('DATE_NAISSANCE')
 def email = System.getenv('EMAIL')
 def numero = System.getenv('NUMERO')
 def nir = System.getenv('NIR')
 
-/*
 // Safely convert to boolean, defaulting to false if null
 nom = (nom != null) ? nom.toBoolean() : false
 prenom = (prenom != null) ? prenom.toBoolean() : false
@@ -24,7 +23,6 @@ birth_date = (birth_date != null) ? birth_date.toBoolean() : false
 email = (email != null) ? email.toBoolean() : false
 numero = (numero != null) ? numero.toBoolean() : false
 nir = (nir != null) ? nir.toBoolean() : false
-*/
 
 // Start building the YAML content
 def yamlContent = """
