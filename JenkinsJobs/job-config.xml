@@ -1,0 +1,254 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <jenkins.plugins.parameter__separator.ParameterSeparatorDefinition plugin="parameter-separator@258.vc2a_4c51b_de4c">
+          <name>separator-9985e8ae-b5e4-4c93-891b-e2c41d9234a4</name>
+          <sectionHeader>Type de données à créer</sectionHeader>
+        </jenkins.plugins.parameter__separator.ParameterSeparatorDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>Nom</name>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>Prenom</name>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>Gender</name>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>Date_naissance</name>
+          <defaultValue>true</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>Email</name>
+          <description>Doit avoir un Nom et Prénom pour que l'email soit généré.</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>Numero</name>
+          <description>Génère un numéro de téléphone fran├ºais</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <hudson.model.BooleanParameterDefinition>
+          <name>NIR</name>
+          <description>Doit avoir un genre et une date de naissance pour fonctionner</description>
+          <defaultValue>false</defaultValue>
+        </hudson.model.BooleanParameterDefinition>
+        <jenkins.plugins.parameter__separator.ParameterSeparatorDefinition plugin="parameter-separator@258.vc2a_4c51b_de4c">
+          <name>separator-f412502a-cd31-4ef9-b5f7-219d03a5a335</name>
+        </jenkins.plugins.parameter__separator.ParameterSeparatorDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>Nombre_data</name>
+          <description>Nombre de données à générer</description>
+          <defaultValue>1</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@332.va_1ee476d8f6d">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.plugins.groovy.SystemGroovy plugin="groovy@457.v99900cb_85593">
+      <source class="hudson.plugins.groovy.StringSystemScriptSource">
+        <script plugin="script-security@1367.vdf2fc45f229c">
+          <script>// Get the workspace directory from the environment
+def workspace = build.getEnvironment(listener).get('WORKSPACE')
+
+// Check if workspace is null
+if (workspace == null) {
+    throw new RuntimeException("Workspace directory not found")
+}
+
+// Read parameters from Jenkins
+def nom = build.getEnvironment(listener).get('NOM')
+def prenom = build.getEnvironment(listener).get('PRENOM')
+def gender = build.getEnvironment(listener).get('GENDER')
+def birth_date = build.getEnvironment(listener).get('DATE_NAISSANCE')
+def email = build.getEnvironment(listener).get('EMAIL')
+def numero = build.getEnvironment(listener).get('NUMERO')
+def nir = build.getEnvironment(listener).get('NIR')
+
+// Safely convert to boolean, defaulting to false if null
+nom = (nom != null) ? nom.toBoolean() : false
+prenom = (prenom != null) ? prenom.toBoolean() : false
+gender = (gender != null) ? gender.toBoolean() : false
+birth_date = (birth_date != null) ? birth_date.toBoolean() : false
+email = (email != null) ? email.toBoolean() : false
+numero = (numero != null) ? numero.toBoolean() : false
+nir = (nir != null) ? nir.toBoolean() : false
+
+
+// Start building the YAML content
+def yamlContent = """
+version: "1"
+masking:
+"""
+
+//Ajoute un prénom
+if (prenom) {
+    yamlContent += """
+  - selector:
+      jsonpath: "first_name"
+    masks:
+      - add: ""
+      - randomChoiceInUri: "pimo://nameFR"
+
+"""
+}
+
+//Ajoute un nom
+if (nom) {
+    yamlContent += """
+  - selector:
+      jsonpath: "last_name"
+    masks:
+      - add: ""
+      - randomChoiceInUri: "pimo://surnameFR"
+
+"""
+}
+
+//Ajoute un genre
+if (gender) {
+    yamlContent += """
+  - selector:
+      jsonpath: "gender"
+    masks:
+      - add: ""
+      - randomChoice:
+        - "M"
+        - "F"
+
+"""
+}
+
+//Ajoute une date de naissance
+if (birth_date) {
+    yamlContent += """
+  - selector:
+      jsonpath: "birth_date"
+    masks:
+      - add: ""
+      - randDate:
+          dateMin: "1950-01-01T00:00:00Z"
+          dateMax: "2020-01-01T00:00:00Z"
+      - dateParser:
+          outputFormat: "02/01/2006"
+
+"""
+}
+
+//Ajoute une adresse email au format prenom.nom
+//Doit avoir un nom et un prénom déjà définis pour que cela fonctionne
+if (email) {
+  yamlContent += """
+  - selector:
+      jsonpath: "email"
+    mask:
+      add: "{{ .first_name | lower | NoAccent }}.{{ .last_name | lower | NoAccent }}@yopmail.fr"
+
+"""
+}
+
+//Ajoute un numéro de téléphone au format fran├ºais
+if (numero) {
+    yamlContent += """
+  - selector:
+      jsonpath: "phone_fr"
+    masks:
+      - add: ""
+      - regex: "0[1-6]( [0-9]{2}){4}"
+
+"""
+}
+
+
+//Ajoute un numéro de sécurité social
+//Doit avoir un genre et une date de naissance pour fonctionner
+if (nir) {
+    yamlContent += """
+  - selector:
+      jsonpath: "department_code"
+    masks:
+      - add: ""
+      - randomInt:
+          min: 1
+          max: 99
+
+  - selector:
+      jsonpath: "city_code"
+    masks:
+      - add: ""
+      - randomInt:
+          min: 1
+          max: 999
+
+  - selector:
+      jsonpath: "order"
+    masks:
+      - add: ""
+      - randomInt:
+          min: 1
+          max: 999
+
+  - selector:
+      jsonpath: "nir_start"
+    mask:
+      add-transient: '{{if eq .gender "M" }}1{{else}}2{{end}}{{.birth_date | substr 8 10}}{{.birth_date | substr 3 5}}{{.department_code | printf "%02d"}}{{.city_code | printf "%03d"}}{{.order | printf "%03d"}}'
+ 
+  - selector:
+      jsonpath: "nir_control"
+    mask:
+      add-transient: '{{ sub 97 (mod (int64 .nir_start)  97)}}'
+
+  - selector:
+      jsonpath: "nir"
+    mask:
+      add: '{{.nir_start}}{{.nir_control}}'
+
+"""
+}
+
+// Write the final YAML content to a file
+def yamlFile = new File("${workspace}/generated.yml")
+yamlFile.text = yamlContent
+</script>
+          <sandbox>false</sandbox>
+        </script>
+      </source>
+    </hudson.plugins.groovy.SystemGroovy>
+    <hudson.tasks.BatchFile>
+      <command>pimo -c %WORKSPACE%\generated.yml --empty-input -r %NOMBRE_DATA% > output.json</command>
+      <configuredLocalRules/>
+    </hudson.tasks.BatchFile>
+  </builders>
+  <publishers>
+    <hudson.tasks.ArtifactArchiver>
+      <artifacts>generated.yml,output.json</artifacts>
+      <allowEmptyArchive>false</allowEmptyArchive>
+      <onlyIfSuccessful>true</onlyIfSuccessful>
+      <fingerprint>false</fingerprint>
+      <defaultExcludes>true</defaultExcludes>
+      <caseSensitive>true</caseSensitive>
+      <followSymlinks>false</followSymlinks>
+    </hudson.tasks.ArtifactArchiver>
+  </publishers>
+  <buildWrappers/>
+</project>
