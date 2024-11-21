@@ -118,7 +118,7 @@ if (nir) {
   - selector:
       jsonpath: "department_code"
     masks:
-      - add-transient: ""
+      - add: ""
       - randomInt:
           min: 1
           max: 99
@@ -126,7 +126,7 @@ if (nir) {
   - selector:
       jsonpath: "city_code"
     masks:
-      - add-transient: ""
+      - add: ""
       - randomInt:
           min: 1
           max: 999
@@ -134,7 +134,7 @@ if (nir) {
   - selector:
       jsonpath: "order"
     masks:
-      - add-transient: ""
+      - add: ""
       - randomInt:
           min: 1
           max: 999
