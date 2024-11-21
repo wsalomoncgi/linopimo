@@ -33,7 +33,7 @@
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
           <name>Numero</name>
-          <description>Génère un numéro de téléphone fran├ºais</description>
+          <description>Génère un numéro de téléphone français</description>
           <defaultValue>false</defaultValue>
         </hudson.model.BooleanParameterDefinition>
         <hudson.model.BooleanParameterDefinition>
@@ -45,7 +45,7 @@
           <name>separator-f412502a-cd31-4ef9-b5f7-219d03a5a335</name>
         </jenkins.plugins.parameter__separator.ParameterSeparatorDefinition>
         <hudson.model.StringParameterDefinition>
-          <name>Nombre_data</name>
+          <name>NOMBRE_DATA</name>
           <description>Nombre de données à générer</description>
           <defaultValue>1</defaultValue>
           <trim>false</trim>
@@ -187,7 +187,7 @@ if (nir) {
   - selector:
       jsonpath: "department_code"
     masks:
-      - add: ""
+      - add-transient: ""
       - randomInt:
           min: 1
           max: 99
@@ -195,7 +195,7 @@ if (nir) {
   - selector:
       jsonpath: "city_code"
     masks:
-      - add: ""
+      - add-transient: ""
       - randomInt:
           min: 1
           max: 999
@@ -203,7 +203,7 @@ if (nir) {
   - selector:
       jsonpath: "order"
     masks:
-      - add: ""
+      - add-transient: ""
       - randomInt:
           min: 1
           max: 999
@@ -235,7 +235,7 @@ yamlFile.text = yamlContent
       </source>
     </hudson.plugins.groovy.SystemGroovy>
     <hudson.tasks.BatchFile>
-      <command>pimo -c %WORKSPACE%\generated.yml --empty-input -r %NOMBRE_DATA% > output.json</command>
+      <command>pimo -c $WORKSPACE\generated.yml --empty-input -r $NOMBRE_DATA > output.json</command>
       <configuredLocalRules/>
     </hudson.tasks.BatchFile>
   </builders>
