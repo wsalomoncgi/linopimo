@@ -1,0 +1,137 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.ChoiceParameterDefinition>
+          <name>PARENT</name>
+          <choices class="java.util.Arrays$ArrayList">
+            <a class="string-array">
+              <string>Homme</string>
+              <string>Femme</string>
+            </a>
+          </choices>
+        </hudson.model.ChoiceParameterDefinition>
+        <de.westemeyer.plugins.multiselect.MultiselectParameterDefinition plugin="multiselect-parameter@1.7">
+          <name>Enfant</name>
+          <decisionTree>
+            <itemList>
+              <de.westemeyer.plugins.multiselect.MultiselectDecisionItem>
+                <label></label>
+                <value>Non</value>
+                <children>
+                  <de.westemeyer.plugins.multiselect.MultiselectDecisionItem>
+                    <label></label>
+                    <value>N/A</value>
+                    <children/>
+                    <parent reference="../../.."/>
+                  </de.westemeyer.plugins.multiselect.MultiselectDecisionItem>
+                </children>
+              </de.westemeyer.plugins.multiselect.MultiselectDecisionItem>
+              <de.westemeyer.plugins.multiselect.MultiselectDecisionItem>
+                <label></label>
+                <value>Oui</value>
+                <children>
+                  <de.westemeyer.plugins.multiselect.MultiselectDecisionItem>
+                    <label></label>
+                    <value>agé de moins de 6 mois</value>
+                    <children/>
+                    <parent reference="../../.."/>
+                  </de.westemeyer.plugins.multiselect.MultiselectDecisionItem>
+                  <de.westemeyer.plugins.multiselect.MultiselectDecisionItem>
+                    <label></label>
+                    <value>agé entre 6 mois et 18 ans</value>
+                    <children/>
+                    <parent reference="../../.."/>
+                  </de.westemeyer.plugins.multiselect.MultiselectDecisionItem>
+                  <de.westemeyer.plugins.multiselect.MultiselectDecisionItem>
+                    <label></label>
+                    <value>agé de plus de 18 ans</value>
+                    <children/>
+                    <parent reference="../../.."/>
+                  </de.westemeyer.plugins.multiselect.MultiselectDecisionItem>
+                </children>
+              </de.westemeyer.plugins.multiselect.MultiselectDecisionItem>
+            </itemList>
+            <variableDescriptions>
+              <de.westemeyer.plugins.multiselect.MultiselectVariableDescriptor>
+                <label>Enfant</label>
+                <variableName>ENFANT</variableName>
+                <columnIndex>0</columnIndex>
+                <uuid>UdxSsdBjvkYAAGGwfVQpBQdKhyOBwi</uuid>
+                <initialValues reference="../../../itemList"/>
+              </de.westemeyer.plugins.multiselect.MultiselectVariableDescriptor>
+              <de.westemeyer.plugins.multiselect.MultiselectVariableDescriptor>
+                <label>Tranche Age</label>
+                <variableName>AGE</variableName>
+                <columnIndex>1</columnIndex>
+                <uuid>bytmMmqRKtjbNIrKhLcxxUTBNVSOMk</uuid>
+                <initialValues reference="../../../itemList/de.westemeyer.plugins.multiselect.MultiselectDecisionItem/children"/>
+              </de.westemeyer.plugins.multiselect.MultiselectVariableDescriptor>
+            </variableDescriptions>
+          </decisionTree>
+          <format>CSV</format>
+          <uuid>lskHQobZOfUDnPr</uuid>
+        </de.westemeyer.plugins.multiselect.MultiselectParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>NOMBRE</name>
+          <description>Nombre de données à générer</description>
+          <defaultValue>1</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+    <com.sonyericsson.rebuild.RebuildSettings plugin="rebuild@332.va_1ee476d8f6d">
+      <autoRebuild>false</autoRebuild>
+      <rebuildDisabled>false</rebuildDisabled>
+    </com.sonyericsson.rebuild.RebuildSettings>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>REPO_URL=&quot;https://github.com/wsalomoncgi/linopimo.git&quot;
+TARGET_DIR=&quot;$WORKSPACE/linopimo&quot;
+if [ -d &quot;$TARGET_DIR&quot; ]; then
+    rm -rf &quot;$TARGET_DIR&quot;
+fi
+git clone &quot;$REPO_URL&quot; &quot;$TARGET_DIR&quot;</command>
+      <configuredLocalRules/>
+    </hudson.tasks.Shell>
+    <hudson.plugins.groovy.Groovy plugin="groovy@457.v99900cb_85593">
+      <scriptSource class="hudson.plugins.groovy.FileScriptSource">
+        <scriptFile>linopimo/PIMO_scripts/script_choix_enfant.groovy</scriptFile>
+      </scriptSource>
+      <groovyName>(Default)</groovyName>
+      <parameters></parameters>
+      <scriptParameters></scriptParameters>
+      <properties></properties>
+      <javaOpts></javaOpts>
+      <classPath></classPath>
+    </hudson.plugins.groovy.Groovy>
+    <hudson.tasks.Shell>
+      <command>pimo -c &quot;$WORKSPACE/generatedYAML.yml&quot; &lt; &quot;$WORKSPACE/generatedJSON.json&quot; -r &quot;$NOMBRE&quot; | jq &gt; output.json</command>
+      <configuredLocalRules/>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers>
+    <hudson.tasks.ArtifactArchiver>
+      <artifacts>generatedYAML.yml,generatedJSON.json,output.json</artifacts>
+      <allowEmptyArchive>false</allowEmptyArchive>
+      <onlyIfSuccessful>false</onlyIfSuccessful>
+      <fingerprint>false</fingerprint>
+      <defaultExcludes>true</defaultExcludes>
+      <caseSensitive>true</caseSensitive>
+      <followSymlinks>false</followSymlinks>
+    </hudson.tasks.ArtifactArchiver>
+  </publishers>
+  <buildWrappers/>
+</project>
