@@ -7,7 +7,7 @@ masking:
   - selector:
       jsonpath: "first_name"
     masks:
-      - randomChoiceInUri: "pimo://surnameFR"
+      - randomChoiceInUri: "pimo://nameFR"
 
   - selector:
       jsonpath: "last_name"
