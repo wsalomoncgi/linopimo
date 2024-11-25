@@ -1,0 +1,27 @@
+# This example show how to generate fake string values that respect a format
+# We will generate phone numbers (France and U.S. formats) using the "regex" mask
+
+version: "1"
+masking:
+
+  - selector:
+      jsonpath: "first_name"
+    masks:
+      - randomChoiceInUri: "pimo://nameFR"
+
+  - selector:
+      jsonpath: "last_name"
+    masks:
+      - randomChoiceInUri: "pimo://surnameFR"
+
+  - selector:
+      jsonpath: "email"
+    mask:
+      template: "{{ .first_name | lower | NoAccent }}.{{ .last_name | lower | NoAccent }}@sakilacustomer.org"
+
+  - selector:
+      jsonpath: "address_id"
+    mask:
+      incremental:
+        start: 1
+        increment: 1
